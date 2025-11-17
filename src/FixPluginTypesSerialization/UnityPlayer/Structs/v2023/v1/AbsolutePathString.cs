@@ -1,23 +1,13 @@
-﻿using FixPluginTypesSerialization.Patchers;
-using FixPluginTypesSerialization.UnityPlayer.Structs.Default;
+﻿using FixPluginTypesSerialization.UnityPlayer.Structs.Default;
 using FixPluginTypesSerialization.Util;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace FixPluginTypesSerialization.UnityPlayer.Structs.v2023.v1
 {
-    [ApplicableToUnityVersionsSince("2023.1.0")]
-    public class AbsolutePathString : IAbsolutePathString
+    public class AbsolutePathString
     {
-        public AbsolutePathString()
-        {
-
-        }
-
         public AbsolutePathString(IntPtr pointer)
         {
             Pointer = pointer;
@@ -39,14 +29,14 @@ namespace FixPluginTypesSerialization.UnityPlayer.Structs.v2023.v1
                 : Marshal.PtrToStringAnsi(_this->union.heap.data, (int)_this->union.heap.size);
             
             var fileNameStr = Path.GetFileName(pathNameStr);
-            var newPathIndex = FixPluginTypesSerializationPatcher.PluginNames.IndexOf(fileNameStr);
+            var newPathIndex = Preload.PluginNames.IndexOf(fileNameStr);
             if (newPathIndex == -1)
             {
                 return;
             }
 
-            var newPath = FixPluginTypesSerializationPatcher.PluginPaths[newPathIndex];
-            var newNativePath = CommonUnityFunctions.MallocString(newPath, UseRightStructs.LabelMemStringId, out var length);
+            var newPath = Preload.PluginPaths[newPathIndex];
+            var newNativePath = CommonUnityFunctions.MallocString(newPath, Preload.LabelMemStringId, out var length);
             if (!_this->union.embedded.flags.IsEmbedded)
             {
                 CommonUnityFunctions.FreeAllocInternal(_this->union.heap.data, _this->label);
@@ -66,7 +56,7 @@ namespace FixPluginTypesSerialization.UnityPlayer.Structs.v2023.v1
                     }
                 }
             };
-            str->label = UseRightStructs.LabelMemStringId;
+            str->label = Preload.LabelMemStringId;
         }
 
         public unsafe string ToStringAnsi()

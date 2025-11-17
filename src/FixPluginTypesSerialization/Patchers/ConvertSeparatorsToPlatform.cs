@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
-using FixPluginTypesSerialization.UnityPlayer;
 using FixPluginTypesSerialization.UnityPlayer.Structs.Default;
-using FixPluginTypesSerialization.Util;
+using FixPluginTypesSerialization.UnityPlayer.Structs.v2023.v1;
 using MonoMod.RuntimeDetour;
 
 namespace FixPluginTypesSerialization.Patchers
 {
-    internal unsafe class ConvertSeparatorsToPlatform : Patcher
+    internal static class ConvertSeparatorsToPlatform
     {
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         private delegate void ConvertSeparatorsToPlatformDelegate(IntPtr assemblyStringPathName);
@@ -19,12 +16,7 @@ namespace FixPluginTypesSerialization.Patchers
 
         internal static bool IsApplied { get; private set; }
 
-        protected override BytePattern[] PdbPatterns { get; } =
-        {
-            Encoding.ASCII.GetBytes(nameof(ConvertSeparatorsToPlatform))
-        };
-
-        protected override unsafe void Apply(IntPtr from)
+        public static void Apply(IntPtr from)
         {
             var hookPtr = Marshal.GetFunctionPointerForDelegate(new ConvertSeparatorsToPlatformDelegate(OnConvertSeparatorsToPlatformV1));
             _detourConvertSeparatorsToPlatform = new NativeDetour(from, hookPtr, new NativeDetourConfig { ManualApply = true });
@@ -44,9 +36,9 @@ namespace FixPluginTypesSerialization.Patchers
             IsApplied = false;
         }
 
-        private static unsafe void OnConvertSeparatorsToPlatformV1(IntPtr assemblyStringPathName)
+        private static void OnConvertSeparatorsToPlatformV1(IntPtr assemblyStringPathName)
         {
-            var assemblyString = UseRightStructs.GetStruct<IAbsolutePathString>(assemblyStringPathName);
+            var assemblyString = new AbsolutePathString(assemblyStringPathName);
 
             assemblyString.FixAbsolutePath();
 

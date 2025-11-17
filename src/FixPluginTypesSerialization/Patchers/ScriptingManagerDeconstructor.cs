@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Text;
-using FixPluginTypesSerialization.Util;
 using MonoMod.RuntimeDetour;
 
 namespace FixPluginTypesSerialization.Patchers
 {
-    internal unsafe class ScriptingManagerDeconstructor : Patcher
+    internal static class ScriptingManagerDeconstructor
     {
         [UnmanagedFunctionPointer(CallingConvention.FastCall)]
         private delegate void ScriptingManagerDeconstructorDelegate(IntPtr scriptingManagerPtr);
@@ -16,18 +14,13 @@ namespace FixPluginTypesSerialization.Patchers
 
         internal static bool IsApplied { get; private set; }
 
-        protected override BytePattern[] PdbPatterns { get; } =
-        {
-            Encoding.ASCII.GetBytes("?1ScriptingManager@"),
-        };
-
-        protected override unsafe void Apply(IntPtr from)
+        public static void Apply(IntPtr from)
         {
             ApplyDetour(from);
             IsApplied = true;
         }
 
-        private void ApplyDetour(IntPtr from)
+        private static void ApplyDetour(IntPtr from)
         {
             var hookPtr = Marshal.GetFunctionPointerForDelegate(new ScriptingManagerDeconstructorDelegate(OnDeconstructor));
             _detour = new NativeDetour(from, hookPtr, new NativeDetourConfig { ManualApply = true });
@@ -50,7 +43,7 @@ namespace FixPluginTypesSerialization.Patchers
             }
         }
 
-        private static unsafe void OnDeconstructor(IntPtr scriptingManagerPtr)
+        private static void OnDeconstructor(IntPtr scriptingManagerPtr)
         {
             AwakeFromLoad.CurrentMonoManager.RestoreOriginalAssemblyNamesArrayPtr();
             Log.Info("Restored original AssemblyNames list");

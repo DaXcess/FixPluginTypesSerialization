@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using FixPluginTypesSerialization.UnityPlayer;
 using FixPluginTypesSerialization.UnityPlayer.Structs.Default;
-using FixPluginTypesSerialization.Util;
+using FixPluginTypesSerialization.UnityPlayer.Structs.v2021.v2;
 using MonoMod.RuntimeDetour;
 
 namespace FixPluginTypesSerialization.Patchers
 {
-    internal unsafe class IsFileCreated : Patcher
+    internal static class IsFileCreated
     {
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         private delegate bool IsFileCreatedDelegate(IntPtr str);
@@ -20,12 +18,7 @@ namespace FixPluginTypesSerialization.Patchers
 
         internal static bool IsApplied { get; private set; }
 
-        protected override BytePattern[] PdbPatterns { get; } =
-        {
-            Encoding.ASCII.GetBytes(nameof(IsFileCreated)),
-        };
-
-        protected override unsafe void Apply(IntPtr from)
+        public static void Apply(IntPtr from)
         {
             var hookPtr =
                 Marshal.GetFunctionPointerForDelegate(new IsFileCreatedDelegate(OnIsFileCreated));
@@ -44,15 +37,13 @@ namespace FixPluginTypesSerialization.Patchers
             IsApplied = false;
         }
 
-        private static unsafe bool OnIsFileCreated(IntPtr str)
+        private static bool OnIsFileCreated(IntPtr str)
         {
-            var assemblyString = UseRightStructs.GetStruct<IIsFileCreatedParam>(str);
+            var assemblyString = new IsFileCreatedParam(str);
             var actualString = assemblyString.ToStringAnsi();
 
-            if (actualString is not null && FixPluginTypesSerializationPatcher.PluginNames.Any(actualString.EndsWith))
-            {
+            if (actualString is not null && Preload.PluginNames.Any(actualString.EndsWith))
                 return true;
-            }
 
             return original(str);
         }

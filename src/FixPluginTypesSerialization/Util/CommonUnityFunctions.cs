@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Text;
-using FixPluginTypesSerialization.UnityPlayer;
 
 namespace FixPluginTypesSerialization.Util
 {
@@ -16,45 +14,18 @@ namespace FixPluginTypesSerialization.Util
         private delegate IntPtr MallocInternalFunc(ulong size, ulong allign, int label, AllocateOptions allocateOptions, IntPtr file, int line);
         private static MallocInternalFunc mallocInternal;
 
-        private delegate void FreeAllocInternalV1Func(IntPtr ptr, int label);
-        private delegate void FreeAllocInternalV2Func(IntPtr ptr, int label, IntPtr file, int line);
-        private static FreeAllocInternalV1Func freeAllocInternalV1;
-        private static FreeAllocInternalV2Func freeAllocInternalV2;
+        private delegate void FreeAllocInternalFunc(IntPtr ptr, int label, IntPtr file, int line);
+        private static FreeAllocInternalFunc _freeAllocInternal;
 
         public static IntPtr ScriptingAssemblies { get; private set; }
 
-        public static void Init(PatternDiscoverer patternDiscoverer)
+        public static void Init(IntPtr unityModule)
         {
-            var mallocInternalAddress = patternDiscoverer.Discover(
-                Config.MallocInternalOffset,
-                [Encoding.ASCII.GetBytes("malloc_internal")]);
-            if (mallocInternalAddress != IntPtr.Zero)
-            {
-                mallocInternal = (MallocInternalFunc)Marshal.GetDelegateForFunctionPointer(mallocInternalAddress, typeof(MallocInternalFunc));
-            }
-
-            var freeAllocInternalAddress = patternDiscoverer.Discover(
-                Config.FreeAllocInternalOffset,
-                [Encoding.ASCII.GetBytes("free_alloc_internal")]);
-            if (freeAllocInternalAddress != IntPtr.Zero)
-            {
-                if (UseRightStructs.UnityVersion >= new Version(2019, 3))
-                {
-                    freeAllocInternalV2 = (FreeAllocInternalV2Func)Marshal.GetDelegateForFunctionPointer(freeAllocInternalAddress, typeof(FreeAllocInternalV2Func));
-                }
-                else
-                {
-                    freeAllocInternalV1 = (FreeAllocInternalV1Func)Marshal.GetDelegateForFunctionPointer(freeAllocInternalAddress, typeof(FreeAllocInternalV1Func));
-                }
-            }
-
-            var scriptingAssembliesAddress = patternDiscoverer.Discover(
-                Config.ScriptingAssembliesOffset,
-                [Encoding.ASCII.GetBytes("m_ScriptingAssemblies@")]);
-            if (scriptingAssembliesAddress != IntPtr.Zero)
-            {
-                ScriptingAssemblies = scriptingAssembliesAddress;
-            }
+            mallocInternal = (MallocInternalFunc)Marshal.GetDelegateForFunctionPointer(
+                (IntPtr)(unityModule.ToInt64() + Preload.MallocInternalOffset), typeof(MallocInternalFunc));
+            _freeAllocInternal = (FreeAllocInternalFunc)Marshal.GetDelegateForFunctionPointer(
+                (IntPtr)(unityModule.ToInt64() + Preload.FreeAllocInternalOffset), typeof(FreeAllocInternalFunc));
+            ScriptingAssemblies = (IntPtr)(unityModule.ToInt64() + Preload.ScriptingAssembliesOffset);
         }
 
         public unsafe static IntPtr MallocString(string str, int label, out ulong length)
@@ -86,14 +57,7 @@ namespace FixPluginTypesSerialization.Util
 
         public static void FreeAllocInternal(IntPtr ptr, int label)
         {
-            if (UseRightStructs.UnityVersion >= new Version(2019, 3))
-            {
-                freeAllocInternalV2(ptr, label, IntPtr.Zero, 0);
-            }
-            else
-            {
-                freeAllocInternalV1(ptr, label);
-            }
+            _freeAllocInternal(ptr, label, IntPtr.Zero, 0);
         }
     }
 }

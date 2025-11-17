@@ -2,12 +2,10 @@
 using FixPluginTypesSerialization.Util;
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
 namespace FixPluginTypesSerialization.UnityPlayer.Structs.v2023.v1
 {
-    [ApplicableToUnityVersionsSince("2023.1.0")]
-    public class MonoManager : IMonoManager
+    public class MonoManager
     {
         public MonoManager()
         {

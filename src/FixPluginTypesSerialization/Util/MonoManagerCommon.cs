@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using FixPluginTypesSerialization.UnityPlayer;
 using FixPluginTypesSerialization.UnityPlayer.Structs.Default;
 
 namespace FixPluginTypesSerialization.Util
@@ -96,7 +93,7 @@ namespace FixPluginTypesSerialization.Util
 
                 var assemblyString = new StringStorageDefaultV1
                 {
-                    label = UseRightStructs.LabelMemStringId,
+                    label = Preload.LabelMemStringId,
                     data = strPtr,
                     capacity = length,
                     size = length
@@ -215,7 +212,7 @@ namespace FixPluginTypesSerialization.Util
                         }
                     },
                     data_repr = StringRepresentation.Heap,
-                    label = UseRightStructs.LabelMemStringId,
+                    label = Preload.LabelMemStringId,
                 };
 
                 managedAssemblyList.Add(assemblyString);
@@ -293,7 +290,7 @@ namespace FixPluginTypesSerialization.Util
                             }
                         }
                     },
-                    label = UseRightStructs.LabelMemStringId,
+                    label = Preload.LabelMemStringId,
                 };
 
                 managedAssemblyList.Add(assemblyString);

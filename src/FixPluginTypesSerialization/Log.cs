@@ -1,21 +1,40 @@
-﻿using BepInEx.Logging;
+﻿using System;
+using System.Runtime.InteropServices;
 
 namespace FixPluginTypesSerialization
 {
     internal static class Log
     {
-        internal static ManualLogSource _logSource;
-
-        internal static void Init()
+        private enum UnityLogType
         {
-            _logSource = Logger.CreateLogSource("FixPluginTypesSerialization");
+            kUnityLogTypeError,
+            kUnityLogTypeWarning,
+            kUnityLogTypeLog
         }
 
-        internal static void Debug(object data) => _logSource.LogDebug(data);
-        internal static void Error(object data) => _logSource.LogError(data);
-        internal static void Fatal(object data) => _logSource.LogFatal(data);
-        internal static void Info(object data) => _logSource.LogInfo(data);
-        internal static void Message(object data) => _logSource.LogMessage(data);
-        internal static void Warning(object data) => _logSource.LogWarning(data);
+        private delegate void LogDelegate(UnityLogType type, string message, string filename, int fileLine);
+
+        private static LogDelegate nativeLog;
+
+        internal static unsafe void Init()
+        {
+            var modBase = Native.GetModuleHandle("preloader");
+            var ifacePtr = (IntPtr**)((IntPtr)(modBase.ToInt64() + Preload.UnityLogPointer)).ToPointer();
+            var loggerPtr = **ifacePtr;
+
+            nativeLog = Marshal.GetDelegateForFunctionPointer<LogDelegate>(loggerPtr);
+        }
+
+        internal static void Error(object data) => nativeLog(UnityLogType.kUnityLogTypeError,
+            $"[FixPluginTypesSerialization] {data}",
+            "FixPluginTypesSerialization", 1);
+
+        internal static void Info(object data) =>
+            nativeLog(UnityLogType.kUnityLogTypeLog, $"[FixPluginTypesSerialization] {data}",
+                "FixPluginTypesSerialization", 1);
+
+        internal static void Warning(object data) => nativeLog(UnityLogType.kUnityLogTypeWarning,
+            $"[FixPluginTypesSerialization] {data}",
+            "FixPluginTypesSerialization", 1);
     }
 }
