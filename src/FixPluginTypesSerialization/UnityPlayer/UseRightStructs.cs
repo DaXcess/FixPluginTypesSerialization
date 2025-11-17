@@ -202,7 +202,7 @@ namespace FixPluginTypesSerialization.UnityPlayer
 
         private static void SetUnityVersionSpecificMemStringId()
         {
-            if (UnityVersion >= new Version(2023, 1))
+            if (UnityVersion >= new Version(2022, 3))
             {
                 LabelMemStringId = 0x9;
             }

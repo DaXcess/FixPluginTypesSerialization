@@ -7,14 +7,15 @@ using System.Text;
 namespace FixPluginTypesSerialization.UnityPlayer.Structs.Default
 {
     //2023
-    [StructLayout(LayoutKind.Sequential, Pack = 8)]
+    [StructLayout(LayoutKind.Sequential)]
     public struct StringStorageDefaultV3
     {
         public StringStorageDefaultV3Union union;
         public int label;
+        public nint labelrootref;
     }
 
-    [StructLayout(LayoutKind.Explicit, Pack = 8)]
+    [StructLayout(LayoutKind.Explicit, Size = 33)]
     public struct StringStorageDefaultV3Union
     {
         [FieldOffset(0)]
@@ -23,50 +24,27 @@ namespace FixPluginTypesSerialization.UnityPlayer.Structs.Default
         public HeapAllocatedRepresentationV3 heap;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     public struct StackAllocatedRepresentationV3
     {
-        public unsafe fixed byte data[31];
+        public unsafe fixed byte data[32];
         public StringStorageDefaultV3Flags flags;
     }
 
+    [StructLayout(LayoutKind.Sequential, Size = 1)]
     public struct StringStorageDefaultV3Flags
     {
         public byte flags;
 
         public bool IsHeap
         {
-            get => (flags & (1 << 6)) > 0;
-            set
-            {
-                if (value)
-                {
-                    flags = 0x5f;
-                }
-                else
-                {
-                    flags = 0;
-                }
-            }
-        }
-        public bool IsExternal
-        {
-            get => (flags & (1 << 7)) > 0;
-            set
-            {
-                if (value)
-                {
-                    flags = 0xff;
-                }
-                else
-                {
-                    flags = 0;
-                }
-            }
+            get => flags == 0;
+            set => flags = value ? (byte)0 : (byte)2;
         }
 
         public bool IsEmbedded
         {
-            get => flags < 0x40;
+            get => flags == 1;
             set => IsHeap = !value;
         }
 
@@ -74,7 +52,7 @@ namespace FixPluginTypesSerialization.UnityPlayer.Structs.Default
         public static implicit operator byte(StringStorageDefaultV3Flags f) => f.flags;
     }
 
-    [StructLayout(LayoutKind.Explicit)]
+    [StructLayout(LayoutKind.Explicit, Size = 33)]
     public struct HeapAllocatedRepresentationV3
     {
         [FieldOffset(0)]
@@ -83,7 +61,7 @@ namespace FixPluginTypesSerialization.UnityPlayer.Structs.Default
         public ulong capacity;
         [FieldOffset(0x10)]
         public ulong size;
-        [FieldOffset(0x1f)]
+        [FieldOffset(0x20)]
         public StringStorageDefaultV3Flags flags;
     }
 }

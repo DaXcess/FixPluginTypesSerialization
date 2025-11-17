@@ -84,14 +84,19 @@ namespace FixPluginTypesSerialization
             var isFileCreatedPatcher = new IsFileCreated();
             var scriptingManagerDeconstructorPatcher = new ScriptingManagerDeconstructor();
             var convertSeparatorsToPlatformPatcher = new ConvertSeparatorsToPlatform();
-            
+
+            Log.Debug("MonoManagerAwakeFromLoad");
             awakeFromLoadPatcher.Patch(patternDiscoverer, Config.MonoManagerAwakeFromLoadOffset);
+            Log.Debug("MonoManagerIsAssemblyCreated");
             isAssemblyCreatedPatcher.Patch(patternDiscoverer, Config.MonoManagerIsAssemblyCreatedOffset);
             if (!IsAssemblyCreated.IsApplied)
             {
+                Log.Debug("IsFileCreated");
                 isFileCreatedPatcher.Patch(patternDiscoverer, Config.IsFileCreatedOffset);
             }
+            Log.Debug("ConvertSeparatorsToPlatform");
             convertSeparatorsToPlatformPatcher.Patch(patternDiscoverer, Config.ConvertSeparatorsToPlatformOffset);
+            Log.Debug("ScriptingManagerDeconstructor");
             scriptingManagerDeconstructorPatcher.Patch(patternDiscoverer, Config.ScriptingManagerDeconstructorOffset);
         }
     }

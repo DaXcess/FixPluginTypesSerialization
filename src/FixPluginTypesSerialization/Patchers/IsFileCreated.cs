@@ -22,7 +22,7 @@ namespace FixPluginTypesSerialization.Patchers
 
         protected override BytePattern[] PdbPatterns { get; } =
         {
-            Encoding.ASCII.GetBytes(nameof(IsFileCreated)),
+            Encoding.ASCII.GetBytes(nameof(IsFileCreated) + "@@"),
         };
 
         protected override unsafe void Apply(IntPtr from)

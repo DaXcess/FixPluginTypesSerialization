@@ -12,6 +12,7 @@ namespace FixPluginTypesSerialization.UnityPlayer.Structs.Default
     {
         public nint ptr;
         public int label;
+        public nint labelRootRef; // Dev build only
         public ulong size;
         public ulong capacity;
     }

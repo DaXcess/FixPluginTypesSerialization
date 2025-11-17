@@ -5,7 +5,7 @@ namespace FixPluginTypesSerialization.Util
 {
     internal class BytePattern
     {
-        private readonly byte?[] pattern;
+        public readonly byte?[] pattern;
         private int[] jumpTable;
 
         public BytePattern(string bytes)
