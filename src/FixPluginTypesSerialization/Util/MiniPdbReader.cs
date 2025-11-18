@@ -107,11 +107,6 @@ namespace FixPluginTypesSerialization.Util
 
         internal unsafe IntPtr FindFunctionOffset(BytePattern[] bytePatterns)
         {
-            foreach (var pat in bytePatterns)
-            {
-                Log.Debug(Encoding.UTF8.GetString(pat.pattern.Cast<byte>().ToArray()));
-            }
-
             fixed (byte* pdbFileStartPtr = &_pdbFile[0])
             {
                 IntPtr pdbStartAddress = (IntPtr)pdbFileStartPtr;
@@ -131,8 +126,6 @@ namespace FixPluginTypesSerialization.Util
 
                 var sectionIndexPtr = (ushort*)(pdbStartAddress.ToInt64() + match.res - 3);
                 var sectionIndex = *sectionIndexPtr - 1;
-
-                Log.Debug($"Section index : {sectionIndex}");
 
                 functionOffset += _peReader.ImageSectionHeaders[sectionIndex].VirtualAddress;
 
