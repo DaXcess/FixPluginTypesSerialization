@@ -9,6 +9,8 @@ public static class Win32
     private const int INTERNET_DEFAULT_HTTPS_PORT = 443;
     private const int INTERNET_DEFAULT_HTTP_PORT = 80;
     private const int WINHTTP_FLAG_SECURE = 0x00800000;
+    private const int WINHTTP_QUERY_FLAG_NUMBER = 0x20000000;
+    private const int WINHTTP_QUERY_STATUS_CODE = 19;
 
     [DllImport("winhttp.dll", SetLastError = true)]
     private static extern IntPtr WinHttpOpen(
@@ -47,6 +49,11 @@ public static class Win32
 
     [DllImport("winhttp.dll", SetLastError = true)]
     private static extern bool WinHttpReceiveResponse(IntPtr request, IntPtr reserved);
+
+    [DllImport("winhttp.dll", SetLastError = true)]
+    private static extern bool WinHttpQueryHeaders(IntPtr request, int dwInfoLevel,
+        [MarshalAs(UnmanagedType.LPWStr)] string pwszName, ref uint lpBuffer, ref uint lpdwBufferLength,
+        IntPtr lpdwIndex);
 
     [DllImport("winhttp.dll", SetLastError = true)]
     private static extern bool WinHttpQueryDataAvailable(IntPtr request, out int bytesAvailable);
@@ -94,6 +101,17 @@ public static class Win32
 
         if (!WinHttpSendRequest(hRequest, IntPtr.Zero, 0, IntPtr.Zero, 0, 0, IntPtr.Zero) ||
             !WinHttpReceiveResponse(hRequest, IntPtr.Zero))
+        {
+            WinHttpCloseHandle(hRequest);
+            WinHttpCloseHandle(hConnect);
+            WinHttpCloseHandle(hSession);
+            return false;
+        }
+
+        var statusCode = 0u;
+        var dwSize = (uint)Marshal.SizeOf(statusCode);
+        if (!WinHttpQueryHeaders(hRequest, WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER, null, ref statusCode,
+                ref dwSize, IntPtr.Zero) || statusCode < 200 || statusCode > 299)
         {
             WinHttpCloseHandle(hRequest);
             WinHttpCloseHandle(hConnect);
