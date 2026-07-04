@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
+﻿using System.Runtime.InteropServices;
 
 namespace FixPluginTypesSerialization.UnityPlayer.Structs.Default
 {
@@ -12,10 +8,9 @@ namespace FixPluginTypesSerialization.UnityPlayer.Structs.Default
     {
         public StringStorageDefaultV3Union union;
         public int label;
-        public nint labelrootref;
     }
 
-    [StructLayout(LayoutKind.Explicit, Size = 33)]
+    [StructLayout(LayoutKind.Explicit, Size = 32)]
     public struct StringStorageDefaultV3Union
     {
         [FieldOffset(0)]
@@ -27,7 +22,7 @@ namespace FixPluginTypesSerialization.UnityPlayer.Structs.Default
     [StructLayout(LayoutKind.Sequential)]
     public struct StackAllocatedRepresentationV3
     {
-        public unsafe fixed byte data[32];
+        public unsafe fixed byte data[31];
         public StringStorageDefaultV3Flags flags;
     }
 
@@ -38,13 +33,39 @@ namespace FixPluginTypesSerialization.UnityPlayer.Structs.Default
 
         public bool IsHeap
         {
-            get => flags == 0;
-            set => flags = value ? (byte)0 : (byte)2;
+            get => (flags & (1 << 6)) > 0;
+            set
+            {
+                if (value)
+                {
+                    flags = 0x5f;
+                }
+                else
+                {
+                    flags = 0;
+                }
+            }
+        }
+
+        public bool IsExternal
+        {
+            get => (flags & (1 << 7)) > 0;
+            set
+            {
+                if (value)
+                {
+                    flags = 0xff;
+                }
+                else
+                {
+                    flags = 0;
+                }
+            }
         }
 
         public bool IsEmbedded
         {
-            get => flags == 1;
+            get => flags < 0x40;
             set => IsHeap = !value;
         }
 
@@ -61,7 +82,7 @@ namespace FixPluginTypesSerialization.UnityPlayer.Structs.Default
         public ulong capacity;
         [FieldOffset(0x10)]
         public ulong size;
-        [FieldOffset(0x20)]
+        [FieldOffset(0x1F)]
         public StringStorageDefaultV3Flags flags;
     }
 }

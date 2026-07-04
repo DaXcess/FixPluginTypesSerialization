@@ -49,7 +49,7 @@ namespace FixPluginTypesSerialization.UnityPlayer.Structs.v2022.v3
             var newNativePath = CommonUnityFunctions.MallocString(newPath, UseRightStructs.LabelMemStringId, out var length);
             if (!_this->union.embedded.flags.IsEmbedded)
             {
-                CommonUnityFunctions.FreeAllocInternal(_this->union.heap.data, _this->label);
+                CommonUnityFunctions.FreeAllocInternal(_this->union.heap.data, UseRightStructs.LabelMemStringId);
             }
 
             var str = _this;
