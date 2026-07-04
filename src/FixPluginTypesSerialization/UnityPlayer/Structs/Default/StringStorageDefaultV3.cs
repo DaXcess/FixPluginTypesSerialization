@@ -73,7 +73,7 @@ namespace FixPluginTypesSerialization.UnityPlayer.Structs.Default
         public static implicit operator byte(StringStorageDefaultV3Flags f) => f.flags;
     }
 
-    [StructLayout(LayoutKind.Explicit, Size = 33)]
+    [StructLayout(LayoutKind.Explicit, Size = 32)]
     public struct HeapAllocatedRepresentationV3
     {
         [FieldOffset(0)]

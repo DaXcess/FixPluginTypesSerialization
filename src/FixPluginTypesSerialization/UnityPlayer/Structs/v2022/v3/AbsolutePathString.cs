@@ -1,12 +1,8 @@
-﻿using FixPluginTypesSerialization.Patchers;
-using FixPluginTypesSerialization.UnityPlayer.Structs.Default;
+﻿using FixPluginTypesSerialization.UnityPlayer.Structs.Default;
 using FixPluginTypesSerialization.Util;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace FixPluginTypesSerialization.UnityPlayer.Structs.v2022.v3
 {
@@ -49,7 +45,7 @@ namespace FixPluginTypesSerialization.UnityPlayer.Structs.v2022.v3
             var newNativePath = CommonUnityFunctions.MallocString(newPath, UseRightStructs.LabelMemStringId, out var length);
             if (!_this->union.embedded.flags.IsEmbedded)
             {
-                CommonUnityFunctions.FreeAllocInternal(_this->union.heap.data, UseRightStructs.LabelMemStringId);
+                CommonUnityFunctions.FreeAllocInternal(_this->union.heap.data, _this->label);
             }
 
             var str = _this;
